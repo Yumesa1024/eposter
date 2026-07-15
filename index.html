@@ -8,68 +8,166 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             margin: 0;
-            padding: 10px;
-            background-color: #f0f2f5;
+            padding: 0 0 20px 0;
             text-align: center;
+            
+            /* ★背景画像の設定 */
+            background-image: url('bg.jpg');
+            background-size: cover;          /* 画面全体に画像をぴったり引き延ばす */
+            background-position: center top; /* 画像の上部・中央を基準にする */
+            background-attachment: fixed;    /* スクロールしても背景画像を固定する */
+            background-color: #0b1326;       /* 万が一、画像読み込みが遅い時のための背景紺色 */
         }
-        h1 { font-size: 1.2rem; color: #333; margin-bottom: 15px; }
-        .select-box {
+        
+        /* バナー画像のエリア */
+        .banner-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto 15px auto;
+            background-color: rgba(255, 255, 255, 0.9); /* バナーの後ろを少しだけ不透明の白にして浮かび上がらせる */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .banner-img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* プルダウンの周りに、文字が見やすくなる半透明の操作パネルを配置 */
+        .control-panel {
             width: 90%;
+            max-width: 450px;
+            margin: 0 auto 15px auto;
+            padding: 15px 10px;
+            background-color: rgba(255, 255, 255, 0.85); /* 半透明の白背景 */
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        
+        .select-box {
+            width: 95%;
             max-width: 400px;
             padding: 12px;
             font-size: 1rem;
             border-radius: 8px;
-            border: 1px solid #ccc;
-            margin-bottom: 15px;
+            border: 1px solid #bbb;
+            margin-bottom: 8px;
+            background-color: #fff;
+            color: #333;
         }
+        .select-box:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* ポスター表示コンテナ */
         .poster-container {
-            width: 100%;
+            width: 90%;
             max-width: 600px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 5px;
+            margin: 15px auto 0 auto;
+            background: rgba(255, 255, 255, 0.95); /* ポスター画像の後ろをほぼ真っ白にしてポスターを見やすく */
+            padding: 8px;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
         }
         .poster-img {
             width: 100%;
             height: auto;
             display: block;
         }
-        p { font-size: 0.8rem; color: #666; margin-top: 8px; }
+        
+        /* 注意書きのテキスト */
+        .caption-text {
+            display: inline-block;
+            font-size: 0.85rem;
+            color: #fff;
+            background-color: rgba(0, 0, 0, 0.6); /* 夜景に負けないよう、文字の背景を黒半透明に */
+            padding: 4px 12px;
+            border-radius: 15px;
+            margin-top: 12px;
+        }
     </style>
 </head>
 <body>
 
-    <h1>第45回日本口腔腫瘍学会総会・学術大会E-Poster</h1>
+    <!-- 画面最上部：公式バナー画像 -->
+    <div class="banner-container">
+        <img src="banner.png" alt="第45回日本口腔腫瘍学会総会・学術大会" class="banner-img">
+    </div>
 
-    <!-- 空のセレクトボックスを用意（JavaScriptで中身を自動生成） -->
-    <select id="poster-select" class="select-box" onchange="changePoster(this.value)">
-        <option value="">▼ 演題を選択してください</option>
-    </select>
+    <!-- 操作パネル（セレクトボックスを半透明プレートで包む） -->
+    <div class="control-panel">
+        <!-- 1つ目のプルダウン：カテゴリー選択 -->
+        <select id="category-select" class="select-box" onchange="updatePosterList(this.value)">
+            <option value="">▼ 1. カテゴリーを選択してください</option>
+        </select>
+        
+        <!-- 2つ目のプルダウン：演題選択 -->
+        <select id="poster-select" class="select-box" onchange="changePoster(this.value)" disabled>
+            <option value="">▼ 2. 演題を選択してください</option>
+        </select>
+    </div>
 
+    <!-- ポスター画像エリア -->
     <div class="poster-container">
-        <img id="poster" class="poster-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='2100' viewBox='0 0 900 2100'><rect width='100%' height='100%' fill='%23eee'/><text x='50%' y='50%' font-size='40' dominant-baseline='middle' text-anchor='middle' fill='%23999'>演題を選択するとここに表示されます</text></svg>" alt="ポスター">
+        <img id="poster" class="poster-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='2100' viewBox='0 0 900 2100'><rect width='100%' height='100%' fill='%23eee'/><text x='50%' y='50%' font-size='40' dominant-baseline='middle' text-anchor='middle' fill='%23999'>カテゴリーと演題を選択してください</text></svg>" onerror="showNoDataImage()" alt="ポスター">
     </div>
     
-    <p>※ピンチ操作（2本の指を広げる）でポスターを拡大して詳細を閲覧できます。</p>
+    <span class="caption-text">※ピンチ操作（2本の指を広げる）でポスターを拡大して詳細を閲覧できます。</span>
 
     <script>
-        // ==========================================
-        // 【管理者設定】今回のポスターの最大数を入力するだけ！
-        // ==========================================
-        const TOTAL_POSTERS = 200; // 本番のポスター数（例: 200）に変更するだけ
+        // ====================================================================
+        // 【管理者設定】15のカテゴリーとポスター番号（1〜200）の振り分け
+        // ====================================================================
+        const categories = [
+            { name: "基礎研究①", start: 1, end: 13 },      // P-1 ～ P-13
+            { name: "基礎研究②", start: 14, end: 26 },     // P-14 ～ P-26
+            { name: "良性腫瘍",   start: 27, end: 39 },     // P-27 ～ P-39
+            { name: "高齢/AYA",   start: 40, end: 52 },     // P-40 ～ P-52
+            { name: "緩和/支持",  start: 53, end: 65 },     // P-53 ～ P-65
+            { name: "症例①",     start: 66, end: 79 },     // P-66 ～ P-79
+            { name: "基礎研究③", start: 80, end: 92 },     // P-80 ～ P-92
+            { name: "臨床研究①", start: 93, end: 105 },    // P-93 ～ P-105
+            { name: "臨床研究②", start: 106, end: 118 },   // P-106 ～ P-118
+            { name: "再建①",     start: 119, end: 131 },   // P-119 ～ P-131
+            { name: "再建②",     start: 132, end: 144 },   // P-132 ～ P-144
+            { name: "薬物療法①", start: 145, end: 158 },   // P-145 ～ P-158
+            { name: "薬物療法②", start: 159, end: 172 },   // P-159 ～ P-172
+            { name: "手術",       start: 173, end: 186 },   // P-173 ～ P-186
+            { name: "症例②",     start: 187, end: 200 }    // P-187 ～ P-200
+        ];
 
-        // ページを開いたときに自動でリストを作る処理
-        const selectBox = document.getElementById('poster-select');
-        for (let i = 1; i <= TOTAL_POSTERS; i++) {
+        const catSelect = document.getElementById('category-select');
+        const posterSelect = document.getElementById('poster-select');
+
+        // ページを開いたときにカテゴリーの一覧を自動作成
+        categories.forEach((cat, index) => {
             const option = document.createElement('option');
-            // ファイル名は P-1.png, P-2.png となるよう設定
-            option.value = `P-${i}.png`;
-            // リストの表示名は P-01, P-02 のようにゼロ埋めで綺麗に表示
-            const zeroPaddedNumber = String(i).padStart(2, '0');
-            option.textContent = `P-${zeroPaddedNumber}：ポスター演題 ${zeroPaddedNumber}`;
-            selectBox.appendChild(option);
+            option.value = index;
+            option.textContent = cat.name;
+            catSelect.appendChild(option);
+        });
+
+        // カテゴリーが選ばれたら、ポスター一覧を更新する処理
+        function updatePosterList(catIndex) {
+            posterSelect.innerHTML = '<option value="">▼ 2. 演題を選択してください</option>';
+            posterSelect.disabled = true;
+
+            if (catIndex === "") {
+                return;
+            }
+
+            const selectedCat = categories[catIndex];
+            
+            for (let i = selectedCat.start; i <= selectedCat.end; i++) {
+                const option = document.createElement('option');
+                option.value = `P-${i}.png`;
+                
+                const zeroPaddedNumber = String(i).padStart(2, '0');
+                option.textContent = `P-${zeroPaddedNumber}：ポスター演題 ${zeroPaddedNumber}`;
+                posterSelect.appendChild(option);
+            }
+
+            posterSelect.disabled = false;
         }
 
         // 画像切り替え処理
@@ -77,6 +175,12 @@
             if (fileName) {
                 document.getElementById('poster').src = fileName;
             }
+        }
+
+        // 画像ファイル（PNG）が存在しない場合に呼び出される処理
+        function showNoDataImage() {
+            const noDataSvg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='2100' viewBox='0 0 900 2100'><rect width='100%' height='100%' fill='%23f5f5f5'/><text x='50%' y='48%' font-size='42' font-weight='bold' dominant-baseline='middle' text-anchor='middle' fill='%23721c24'>登録がありません</text><text x='50%' y='53%' font-size='24' dominant-baseline='middle' text-anchor='middle' fill='%235f6368'>こちらの演題のポスターデータは登録されていません。</text></svg>";
+            document.getElementById('poster').src = noDataSvg;
         }
     </script>
 </body>
