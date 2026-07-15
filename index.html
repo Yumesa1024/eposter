@@ -11,12 +11,12 @@
             padding: 0 0 20px 0;
             text-align: center;
             
-            /* ★背景画像の設定 */
+            /* 背景画像の設定 */
             background-image: url('bg.jpg');
-            background-size: cover;          /* 画面全体に画像をぴったり引き延ばす */
-            background-position: center top; /* 画像の上部・中央を基準にする */
-            background-attachment: fixed;    /* スクロールしても背景画像を固定する */
-            background-color: #0b1326;       /* 万が一、画像読み込みが遅い時のための背景紺色 */
+            background-size: cover;
+            background-position: center top;
+            background-attachment: fixed;
+            background-color: #0b1326;
         }
         
         /* バナー画像のエリア */
@@ -24,7 +24,7 @@
             width: 100%;
             max-width: 800px;
             margin: 0 auto 15px auto;
-            background-color: rgba(255, 255, 255, 0.9); /* バナーの後ろを少しだけ不透明の白にして浮かび上がらせる */
+            background-color: rgba(255, 255, 255, 0.9);
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         .banner-img {
@@ -33,13 +33,13 @@
             display: block;
         }
         
-        /* プルダウンの周りに、文字が見やすくなる半透明の操作パネルを配置 */
+        /* 操作パネル */
         .control-panel {
             width: 90%;
             max-width: 450px;
             margin: 0 auto 15px auto;
             padding: 15px 10px;
-            background-color: rgba(255, 255, 255, 0.85); /* 半透明の白背景 */
+            background-color: rgba(255, 255, 255, 0.92);
             border-radius: 12px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
@@ -51,12 +51,66 @@
             font-size: 1rem;
             border-radius: 8px;
             border: 1px solid #bbb;
-            margin-bottom: 8px;
             background-color: #fff;
             color: #333;
+            margin-bottom: 10px;
         }
-        .select-box:last-child {
-            margin-bottom: 0;
+
+        /* 選択された演題情報の表示エリア */
+        .selected-info-panel {
+            font-size: 0.9rem;
+            color: #333;
+            text-align: left;
+            padding: 10px;
+            background-color: #f1f3f4;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            border-left: 4px solid #1a73e8;
+            display: none; /* 初期状態は非表示 */
+        }
+        .info-title {
+            font-weight: bold;
+            color: #1a73e8;
+            margin-bottom: 3px;
+        }
+        .info-presenter {
+            font-size: 0.8rem;
+            color: #666;
+            text-align: right;
+        }
+
+        /* ボタンが並ぶエリアの設定 */
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        /* ポスター番号ボタン単体のデザイン */
+        .poster-btn {
+            background-color: #f0f2f5;
+            color: #333;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 8px 14px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 55px;
+        }
+        .poster-btn:active {
+            transform: scale(0.95);
+        }
+        .poster-btn.active {
+            background-color: #1a73e8;
+            color: #fff;
+            border-color: #1a73e8;
+            box-shadow: 0 2px 4px rgba(26,115,232,0.4);
         }
         
         /* ポスター表示コンテナ */
@@ -64,7 +118,7 @@
             width: 90%;
             max-width: 600px;
             margin: 15px auto 0 auto;
-            background: rgba(255, 255, 255, 0.95); /* ポスター画像の後ろをほぼ真っ白にしてポスターを見やすく */
+            background: rgba(255, 255, 255, 0.95);
             padding: 8px;
             border-radius: 8px;
             box-shadow: 0 6px 15px rgba(0,0,0,0.4);
@@ -80,7 +134,7 @@
             display: inline-block;
             font-size: 0.85rem;
             color: #fff;
-            background-color: rgba(0, 0, 0, 0.6); /* 夜景に負けないよう、文字の背景を黒半透明に */
+            background-color: rgba(0, 0, 0, 0.6);
             padding: 4px 12px;
             border-radius: 15px;
             margin-top: 12px;
@@ -94,52 +148,98 @@
         <img src="banner.png" alt="第45回日本口腔腫瘍学会総会・学術大会" class="banner-img">
     </div>
 
-    <!-- 操作パネル（セレクトボックスを半透明プレートで包む） -->
+    <!-- 操作パネル -->
     <div class="control-panel">
         <!-- 1つ目のプルダウン：カテゴリー選択 -->
-        <select id="category-select" class="select-box" onchange="updatePosterList(this.value)">
-            <option value="">▼ 1. カテゴリーを選択してください</option>
+        <select id="category-select" class="select-box" onchange="updatePosterButtons(this.value)">
+            <option value="">▼ カテゴリーを選択してください</option>
         </select>
         
-        <!-- 2つ目のプルダウン：演題選択 -->
-        <select id="poster-select" class="select-box" onchange="changePoster(this.value)" disabled>
-            <option value="">▼ 2. 演題を選択してください</option>
-        </select>
+        <!-- 選択中のポスターのタイトル＆演者名表示パネル -->
+        <div id="info-panel" class="selected-info-panel">
+            <div id="info-title" class="info-title"></div>
+            <div id="info-presenter" class="info-presenter"></div>
+        </div>
+        
+        <!-- 選択されたカテゴリーのポスター番号ボタン -->
+        <div id="button-area" class="button-container"></div>
     </div>
 
     <!-- ポスター画像エリア -->
     <div class="poster-container">
-        <img id="poster" class="poster-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='2100' viewBox='0 0 900 2100'><rect width='100%' height='100%' fill='%23eee'/><text x='50%' y='50%' font-size='40' dominant-baseline='middle' text-anchor='middle' fill='%23999'>カテゴリーと演題を選択してください</text></svg>" onerror="showNoDataImage()" alt="ポスター">
+        <img id="poster" class="poster-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='2100' viewBox='0 0 900 2100'><rect width='100%' height='100%' fill='%23eee'/><text x='50%' y='50%' font-size='40' dominant-baseline='middle' text-anchor='middle' fill='%23999'>カテゴリーを選択してください</text></svg>" onerror="showNoDataImage()" alt="ポスター">
     </div>
     
     <span class="caption-text">※ピンチ操作（2本の指を広げる）でポスターを拡大して詳細を閲覧できます。</span>
 
     <script>
         // ====================================================================
-        // 【管理者設定】15のカテゴリーとポスター番号（1〜200）の振り分け
+        // 【カテゴリー定義】
         // ====================================================================
         const categories = [
-            { name: "基礎研究①", start: 1, end: 13 },      // P-1 ～ P-13
-            { name: "基礎研究②", start: 14, end: 26 },     // P-14 ～ P-26
-            { name: "良性腫瘍",   start: 27, end: 39 },     // P-27 ～ P-39
-            { name: "高齢/AYA",   start: 40, end: 52 },     // P-40 ～ P-52
-            { name: "緩和/支持",  start: 53, end: 65 },     // P-53 ～ P-65
-            { name: "症例①",     start: 66, end: 79 },     // P-66 ～ P-79
-            { name: "基礎研究③", start: 80, end: 92 },     // P-80 ～ P-92
-            { name: "臨床研究①", start: 93, end: 105 },    // P-93 ～ P-105
-            { name: "臨床研究②", start: 106, end: 118 },   // P-106 ～ P-118
-            { name: "再建①",     start: 119, end: 131 },   // P-119 ～ P-131
-            { name: "再建②",     start: 132, end: 144 },   // P-132 ～ P-144
-            { name: "薬物療法①", start: 145, end: 158 },   // P-145 ～ P-158
-            { name: "薬物療法②", start: 159, end: 172 },   // P-159 ～ P-172
-            { name: "手術",       start: 173, end: 186 },   // P-173 ～ P-186
-            { name: "症例②",     start: 187, end: 200 }    // P-187 ～ P-200
+            { name: "基礎研究①", start: 1, end: 13, prefix: "口腔癌細胞における遺伝子解析とシグナル伝達経路の検討" },
+            { name: "基礎研究②", start: 14, end: 26, prefix: "微小環境および免疫逃避機構の解明に向けた基礎的アプローチ" },
+            { name: "良性腫瘍",   start: 27, end: 39, prefix: "口腔領域における良性腫瘍・腫瘍類似病変の臨床統計的検討" },
+            { name: "高齢/AYA",   start: 40, end: 52, prefix: "超高齢社会における口腔がん治療の選択とAYA世代への支援体制" },
+            { name: "緩和/支持",  start: 53, end: 65, prefix: "周術期口腔機能管理およびがん緩和ケアにおけるチーム医療の役割" },
+            { name: "症例①",     start: 66, end: 79, prefix: "稀な転移あるいは治療に難渋した口腔腫瘍の一症例" },
+            { name: "基礎研究③", start: 80, end: 92, prefix: "バイオマーカーの探索と新規創薬ターゲットの同定" },
+            { name: "臨床研究①", start: 93, end: 105, prefix: "口腔扁平上皮癌における早期診断技術と長期予後因子の解析" },
+            { name: "臨床研究②", start: 106, end: 118, prefix: "多施設共同研究に基づく治療成績の比較とQOL評価" },
+            { name: "再建①",     start: 119, end: 131, prefix: "遊離皮弁を用いた口腔顎顔面再建手術の機能的回復と工夫" },
+            { name: "再建②",     start: 132, end: 144, prefix: "下顎再建における3Dデジタルシミュレーションの応用と臨床評価" },
+            { name: "薬物療法①", start: 145, end: 158, prefix: "口腔癌に対する一次化学療法および最新の免疫チェックポイント阻害薬" },
+            { name: "薬物療法②", start: 159, end: 172, prefix: "分子標的薬併用放射線療法の有害事象とその管理" },
+            { name: "手術",       start: 173, end: 186, prefix: "低侵襲手術（センチネルリンパ節生検・ロボット支援下手術）の実際" },
+            { name: "症例②",     start: 187, end: 200, prefix: "高度な顎骨欠損を伴う症例に対する機能的咀嚼機能回復の一例" }
         ];
 
-        const catSelect = document.getElementById('category-select');
-        const posterSelect = document.getElementById('poster-select');
+        // ====================================================================
+        // 【演者名のダミーリスト】（男女混合の架空の日本人フルネーム50名からランダム選出）
+        // ====================================================================
+        const mockPresenters = [
+            "佐藤 健一", "鈴木 美咲", "高橋 洋平", "田中 結衣", "伊藤 拓海", "渡辺 陽子", "山本 大介", "中村 愛美", "小林 真一", "加藤 恵子",
+            "吉田 翔太", "山田 明美", "佐々木 翼", "山口 千尋", "松本 裕二", "井上 萌", "木村 和也", "林 智子", "清水 太一", "山崎 優子",
+            "池田 浩治", "森 雅代", "斉藤 達也", "前田 香織", "岡田 俊介", "藤田 亜美", "長谷川 剛", "石井 直美", "近藤 隆", "坂本 恵",
+            "青木 直樹", "藤井 玲奈", "丸山 誠", "宮崎 まどか", "金子 智也", "三浦 麻衣", "大野 貴史", "小野 さくら", "田村 健太郎", "竹内 綾香",
+            "松井 一樹", "和泉 菜々", "木下 翔", "原田 舞衣", "中川 康平", "多田 友美", "中山 竜司", "杉山 杏奈", "石原 慎也", "柴田 聡美"
+        ];
 
-        // ページを開いたときにカテゴリーの一覧を自動作成
+        // ====================================================================
+        // 【200演題自動生成エンジン】
+        // ====================================================================
+        const posterDatabase = {};
+        
+        categories.forEach((cat) => {
+            const subtopics = [
+                "に関する多施設共同臨床研究", "についての基礎的検討", "の分子機構の解析",
+                "の実態と治療ガイドラインの策定", "における予後関連遺伝子の解析", "の三次元的動態分析",
+                "に対する最新治療ストラテジー", "の臨床評価とトラブルマネジメント"
+            ];
+            
+            for (let i = cat.start; i <= cat.end; i++) {
+                const zeroPaddedNumber = String(i).padStart(2, '0');
+                const titleSuffix = subtopics[i % subtopics.length];
+                const presenter = mockPresenters[i % mockPresenters.length];
+                
+                posterDatabase[`P-${i}.png`] = {
+                    id: `P-${zeroPaddedNumber}`,
+                    title: `P-${zeroPaddedNumber}：${cat.prefix}${titleSuffix}`,
+                    presenter: `演者：${presenter} （口腔腫瘍大学付属病院・歯科口腔外科）`
+                };
+            }
+        });
+
+        // ====================================================================
+        // 【UI描画・イベント処理】
+        // ====================================================================
+        const catSelect = document.getElementById('category-select');
+        const buttonArea = document.getElementById('button-area');
+        const infoPanel = document.getElementById('info-panel');
+        const infoTitle = document.getElementById('info-title');
+        const infoPresenter = document.getElementById('info-presenter');
+
+        // カテゴリープルダウンの初期生成
         categories.forEach((cat, index) => {
             const option = document.createElement('option');
             option.value = index;
@@ -147,27 +247,44 @@
             catSelect.appendChild(option);
         });
 
-        // カテゴリーが選ばれたら、ポスター一覧を更新する処理
-        function updatePosterList(catIndex) {
-            posterSelect.innerHTML = '<option value="">▼ 2. 演題を選択してください</option>';
-            posterSelect.disabled = true;
+        // カテゴリーが選ばれたら、ポスター番号のボタン一覧を生成
+        function updatePosterButtons(catIndex) {
+            buttonArea.innerHTML = ''; 
+            infoPanel.style.display = 'none'; // 情報表示パネルを隠す
 
             if (catIndex === "") {
+                document.getElementById('poster').src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='2100' viewBox='0 0 900 2100'><rect width='100%' height='100%' fill='%23eee'/><text x='50%' y='50%' font-size='40' dominant-baseline='middle' text-anchor='middle' fill='%23999'>カテゴリーを選択してください</text></svg>";
                 return;
             }
 
             const selectedCat = categories[catIndex];
             
             for (let i = selectedCat.start; i <= selectedCat.end; i++) {
-                const option = document.createElement('option');
-                option.value = `P-${i}.png`;
-                
+                const btn = document.createElement('button');
                 const zeroPaddedNumber = String(i).padStart(2, '0');
-                option.textContent = `P-${zeroPaddedNumber}：ポスター演題 ${zeroPaddedNumber}`;
-                posterSelect.appendChild(option);
+                btn.textContent = `P-${zeroPaddedNumber}`;
+                btn.className = 'poster-btn';
+                
+                btn.onclick = function() {
+                    const allButtons = buttonArea.getElementsByClassName('poster-btn');
+                    for (let b of allButtons) {
+                        b.classList.remove('active');
+                    }
+                    btn.classList.add('active');
+                    
+                    // 選択された演題データ（演題名・演者）を取得して上部パネルに表示
+                    const posterData = posterDatabase[`P-${i}.png`];
+                    if (posterData) {
+                        infoTitle.textContent = posterData.title;
+                        infoPresenter.textContent = posterData.presenter;
+                        infoPanel.style.display = 'block'; // パネルを表示
+                    }
+                    
+                    changePoster(`P-${i}.png`);
+                };
+                
+                buttonArea.appendChild(btn);
             }
-
-            posterSelect.disabled = false;
         }
 
         // 画像切り替え処理
@@ -177,7 +294,7 @@
             }
         }
 
-        // 画像ファイル（PNG）が存在しない場合に呼び出される処理
+        // 画像が存在しない場合の代わり（登録がありません）
         function showNoDataImage() {
             const noDataSvg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='2100' viewBox='0 0 900 2100'><rect width='100%' height='100%' fill='%23f5f5f5'/><text x='50%' y='48%' font-size='42' font-weight='bold' dominant-baseline='middle' text-anchor='middle' fill='%23721c24'>登録がありません</text><text x='50%' y='53%' font-size='24' dominant-baseline='middle' text-anchor='middle' fill='%235f6368'>こちらの演題のポスターデータは登録されていません。</text></svg>";
             document.getElementById('poster').src = noDataSvg;
