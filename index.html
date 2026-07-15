@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>第45回日本口腔腫瘍学会総会・学術大会E-Poster</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 10px;
+            background-color: #f0f2f5;
+            text-align: center;
+        }
+        h1 { font-size: 1.2rem; color: #333; margin-bottom: 15px; }
+        .select-box {
+            width: 90%;
+            max-width: 400px;
+            padding: 12px;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+        }
+        .poster-container {
+            width: 100%;
+            max-width: 600px; /* 縦長ポスターが見やすい幅に制限 */
+            margin: 0 auto;
+            background: #fff;
+            padding: 5px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .poster-img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        p { font-size: 0.8rem; color: #666; margin-top: 8px; }
+    </style>
+</head>
+<body>
+
+    <h1>第45回日本口腔腫瘍学会総会・学術大会E-Poster</h1>
+
+    <!-- 演題選択メニュー -->
+    <select class="select-box" onchange="changePoster(this.value)">
+        <option value="">▼ 演題を選択してください</option>
+        <option value="P-1.png">P-1：〇〇の治療における最新の知見</option>
+        <option value="P-2.png">P-2：当院における〇〇の症例報告</option>
+        <option value="P-3.png">P-3：新規デバイスを用いた臨床研究</option>
+    </select>
+
+    <div class="poster-container">
+        <!-- 初期状態は案内画像、またはロゴなどを表示 -->
+        <img id="poster" class="poster-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='2100' viewBox='0 0 900 2100'><rect width='100%' height='100%' fill='%23eee'/><text x='50%' y='50%' font-size='40' dominant-baseline='middle' text-anchor='middle' fill='%23999'>演題を選択するとここに表示されます</text></svg>" alt="ポスター">
+    </div>
+    
+    <p>※ピンチ操作（2本の指を広げる）でポスターを拡大して詳細を閲覧できます。</p>
+
+    <script>
+        function changePoster(fileName) {
+            if (fileName) {
+                document.getElementById('poster').src = fileName;
+            }
+        }
+    </script>
+</body>
+</html>
