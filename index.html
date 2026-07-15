@@ -24,7 +24,7 @@
         }
         .poster-container {
             width: 100%;
-            max-width: 600px; /* 縦長ポスターが見やすい幅に制限 */
+            max-width: 600px;
             margin: 0 auto;
             background: #fff;
             padding: 5px;
@@ -43,22 +43,36 @@
 
     <h1>第45回日本口腔腫瘍学会総会・学術大会E-Poster</h1>
 
-    <!-- 演題選択メニュー -->
-    <select class="select-box" onchange="changePoster(this.value)">
+    <!-- 空のセレクトボックスを用意（JavaScriptで中身を自動生成） -->
+    <select id="poster-select" class="select-box" onchange="changePoster(this.value)">
         <option value="">▼ 演題を選択してください</option>
-        <option value="P-1.png">P-1：〇〇の治療における最新の知見</option>
-        <option value="P-2.png">P-2：当院における〇〇の症例報告</option>
-        <option value="P-3.png">P-3：新規デバイスを用いた臨床研究</option>
     </select>
 
     <div class="poster-container">
-        <!-- 初期状態は案内画像、またはロゴなどを表示 -->
         <img id="poster" class="poster-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='2100' viewBox='0 0 900 2100'><rect width='100%' height='100%' fill='%23eee'/><text x='50%' y='50%' font-size='40' dominant-baseline='middle' text-anchor='middle' fill='%23999'>演題を選択するとここに表示されます</text></svg>" alt="ポスター">
     </div>
     
     <p>※ピンチ操作（2本の指を広げる）でポスターを拡大して詳細を閲覧できます。</p>
 
     <script>
+        // ==========================================
+        // 【管理者設定】今回のポスターの最大数を入力するだけ！
+        // ==========================================
+        const TOTAL_POSTERS = 200; // 本番のポスター数（例: 200）に変更するだけ
+
+        // ページを開いたときに自動でリストを作る処理
+        const selectBox = document.getElementById('poster-select');
+        for (let i = 1; i <= TOTAL_POSTERS; i++) {
+            const option = document.createElement('option');
+            // ファイル名は P-1.png, P-2.png となるよう設定
+            option.value = `P-${i}.png`;
+            // リストの表示名は P-01, P-02 のようにゼロ埋めで綺麗に表示
+            const zeroPaddedNumber = String(i).padStart(2, '0');
+            option.textContent = `P-${zeroPaddedNumber}：ポスター演題 ${zeroPaddedNumber}`;
+            selectBox.appendChild(option);
+        }
+
+        // 画像切り替え処理
         function changePoster(fileName) {
             if (fileName) {
                 document.getElementById('poster').src = fileName;
