@@ -33,7 +33,7 @@
             display: block;
         }
         
-        /* 操作パネル（プルダウンとリストを包むカード） */
+        /* 操作パネル（プルダウン・検索窓・リストを包むカード） */
         .control-panel {
             width: 92%;
             max-width: 500px;
@@ -54,14 +54,35 @@
             border: 1px solid #bbb;
             background-color: #fff;
             color: #333;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
-        /* ★スマホ向け演題リストのコンテナ（高さを制限して、はみ出しを防ぐ） */
+        /* ★検索ボックスのデザイン */
+        .search-box-container {
+            width: 95%;
+            margin: 0 auto 12px auto;
+            position: relative;
+        }
+        .search-input {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 1rem;
+            border: 2px solid #1a73e8; /* 検索窓を目立たせるために青枠に */
+            border-radius: 8px;
+            box-sizing: border-box;
+            outline: none;
+            background-color: #f8fafc;
+        }
+        .search-input:focus {
+            background-color: #fff;
+            box-shadow: 0 0 5px rgba(26,115,232,0.3);
+        }
+
+        /* スマホ向け演題リストのコンテナ */
         .list-container {
             width: 95%;
             margin: 0 auto;
-            max-height: 280px; /* スマホ画面の半分に収まるコンパクトな高さに制限 */
+            max-height: 280px; /* スマホ画面の半分に収まるコンパクトな高さ */
             overflow-y: auto;
             border-radius: 8px;
             border: 1px solid #ddd;
@@ -76,25 +97,23 @@
             padding: 10px 8px;
             border-bottom: 1px solid #eee;
             cursor: pointer;
-            -webkit-tap-highlight-color: transparent; /* スマホのタップ時の青枠を消す */
+            -webkit-tap-highlight-color: transparent;
         }
         .list-item:last-child {
             border-bottom: none;
         }
         
-        /* タップ中（アクティブ）の効果 */
         .list-item:active {
             background-color: #f1f5f9;
         }
 
-        /* 現在選択されて表示中の演題 */
         .list-item.active {
             background-color: #e8f0fe;
             border-left: 5px solid #1a73e8;
-            padding-left: 4px; /* 線の分調整 */
+            padding-left: 4px;
         }
 
-        /* 番号バッジ（スマホ幅に合わせた省スペース設計） */
+        /* 番号バッジ */
         .badge {
             background-color: #64748b;
             color: white;
@@ -130,7 +149,7 @@
             color: #64748b;
         }
         
-        /* ポスター表示コンテナ（リストの下に表示） */
+        /* ポスター表示コンテナ */
         .poster-container {
             width: 92%;
             max-width: 500px;
@@ -168,18 +187,23 @@
 
     <!-- 操作パネル -->
     <div class="control-panel">
-        <!-- 1つ目のプルダウン：カテゴリー選択 -->
+        <!-- プルダウン：カテゴリー選択 -->
         <select id="category-select" class="select-box" onchange="updatePosterList(this.value)">
             <option value="">▼ カテゴリーを選択してください</option>
         </select>
         
-        <!-- ★スマホ向け演題リストが表示されるエリア -->
+        <!-- ★【新設】検索ボックス（番号、演者名、演題キーワードに対応） -->
+        <div class="search-box-container">
+            <input type="text" id="search-input" class="search-input" placeholder="🔍 ポスター番号、演者名、キーワードで検索..." oninput="searchPosters(this.value)">
+        </div>
+        
+        <!-- スマホ向け演題リスト -->
         <div id="list-area" class="list-container" style="display: none;"></div>
     </div>
 
     <!-- ポスター画像エリア -->
     <div class="poster-container">
-        <img id="poster" class="poster-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='2100' viewBox='0 0 900 2100'><rect width='100%' height='100%' fill='%23eee'/><text x='50%' y='50%' font-size='40' dominant-baseline='middle' text-anchor='middle' fill='%23999'>演題を選択してください</text></svg>" onerror="showNoDataImage()" alt="ポスター">
+        <img id="poster" class="poster-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='2100' viewBox='0 0 900 2100'><rect width='100%' height='100%' fill='%23eee'/><text x='50%' y='50%' font-size='40' dominant-baseline='middle' text-anchor='middle' fill='%23999'>演題を選択または検索してください</text></svg>" onerror="showNoDataImage()" alt="ポスター">
     </div>
     
     <span class="caption-text">※ピンチ操作（2本の指を広げる）でポスターを拡大して詳細を閲覧できます。</span>
@@ -218,9 +242,9 @@
         ];
 
         // ====================================================================
-        // 【200演題自動生成データベース：スマホに合わせたP-01表記に統合】
+        // 【200演題自動生成データベース】
         // ====================================================================
-        const posterDatabase = {};
+        const posterDatabase = [];
         
         categories.forEach((cat) => {
             const subtopics = [
@@ -234,11 +258,14 @@
                 const titleSuffix = subtopics[i % subtopics.length];
                 const presenter = mockPresenters[i % mockPresenters.length];
                 
-                posterDatabase[`P-${i}.png`] = {
-                    id: `${zeroPaddedNumber}`,
+                posterDatabase.push({
+                    realId: i, // 実際のファイル用 (P-1.png など)
+                    badgeId: `P-${zeroPaddedNumber}`, // 画面表示用 (P-01)
                     title: `${cat.prefix}${titleSuffix}`,
-                    presenter: `${presenter} （口腔腫瘍大）`
-                };
+                    presenter: presenter,
+                    fullPresenterInfo: `演者：${presenter} （口腔腫瘍大学）`,
+                    catName: cat.name
+                });
             }
         });
 
@@ -247,72 +274,103 @@
         // ====================================================================
         const catSelect = document.getElementById('category-select');
         const listArea = document.getElementById('list-area');
+        const searchInput = document.getElementById('search-input');
 
-        // カテゴリープルダウンの生成
+        // カテゴリープルダウンの初期生成
         categories.forEach((cat, index) => {
             const option = document.createElement('option');
-            option.value = index;
+            option.value = cat.name;
             option.textContent = cat.name;
             catSelect.appendChild(option);
         });
 
-        // カテゴリー選択時に、スマホ最適化リストを一覧表示
-        function updatePosterList(catIndex) {
+        // リスト描画の共通関数
+        function renderList(items) {
             listArea.innerHTML = '';
-            listArea.style.display = 'none';
-
-            if (catIndex === "") {
-                document.getElementById('poster').src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='2100' viewBox='0 0 900 2100'><rect width='100%' height='100%' fill='%23eee'/><text x='50%' y='50%' font-size='40' dominant-baseline='middle' text-anchor='middle' fill='%23999'>演題を選択してください</text></svg>";
+            
+            if (items.length === 0) {
+                listArea.innerHTML = '<div style="padding: 15px; text-align: center; color: #999; font-size: 0.9rem;">一致する演題が見つかりません</div>';
+                listArea.style.display = 'block';
                 return;
             }
 
-            const selectedCat = categories[catIndex];
-            
-            for (let i = selectedCat.start; i <= selectedCat.end; i++) {
-                const posterData = posterDatabase[`P-${i}.png`];
-                if (!posterData) continue;
-
+            items.forEach((item) => {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'list-item';
                 
-                // バッジ「P-01」
                 const badgeDiv = document.createElement('div');
                 badgeDiv.className = 'badge';
-                badgeDiv.textContent = `P-${posterData.id}`;
+                badgeDiv.textContent = item.badgeId;
                 
-                // 演題・演者情報
                 const infoDiv = document.createElement('div');
                 infoDiv.className = 'info-content';
                 
                 const titleDiv = document.createElement('div');
                 titleDiv.className = 'title-text';
-                titleDiv.textContent = posterData.title;
+                titleDiv.textContent = item.title;
                 
                 const presenterDiv = document.createElement('div');
                 presenterDiv.className = 'presenter-text';
-                presenterDiv.textContent = `演者：${posterData.presenter}`;
+                presenterDiv.textContent = item.fullPresenterInfo;
                 
                 infoDiv.appendChild(titleDiv);
                 infoDiv.appendChild(presenterDiv);
                 itemDiv.appendChild(badgeDiv);
                 itemDiv.appendChild(infoDiv);
                 
-                // タップされたらアクティブに切り替え、ポスター画像を表示
                 itemDiv.onclick = function() {
                     const allItems = listArea.getElementsByClassName('list-item');
-                    for (let item of allItems) {
-                        item.classList.remove('active');
+                    for (let x of allItems) {
+                        x.classList.remove('active');
                     }
                     itemDiv.classList.add('active');
-                    
-                    // 下の画像エリアを切り替え
-                    changePoster(`P-${i}.png`);
+                    changePoster(`P-${item.realId}.png`);
                 };
                 
                 listArea.appendChild(itemDiv);
-            }
+            });
 
             listArea.style.display = 'block';
+        }
+
+        // カテゴリーが選ばれたときの処理
+        function updatePosterList(catName) {
+            searchInput.value = ''; // 検索窓をリセット
+            
+            if (catName === "") {
+                listArea.innerHTML = '';
+                listArea.style.display = 'none';
+                document.getElementById('poster').src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='2100' viewBox='0 0 900 2100'><rect width='100%' height='100%' fill='%23eee'/><text x='50%' y='50%' font-size='40' dominant-baseline='middle' text-anchor='middle' fill='%23999'>演題を選択または検索してください</text></svg>";
+                return;
+            }
+
+            // カテゴリーに所属する演題を抽出して描画
+            const filtered = posterDatabase.filter(item => item.catName === catName);
+            renderList(filtered);
+        }
+
+        // ★【検索ボックス入力時】リアルタイム絞り込み処理
+        function searchPosters(keyword) {
+            catSelect.value = ''; // カテゴリー選択をリセット
+
+            const cleanKeyword = keyword.trim().toLowerCase();
+            if (cleanKeyword === "") {
+                listArea.innerHTML = '';
+                listArea.style.display = 'none';
+                return;
+            }
+
+            // 「演者名」「ポスター番号（ハイフン有無も対応）」「演題キーワード」で絞り込み
+            const matched = posterDatabase.filter(item => {
+                const searchId = item.badgeId.toLowerCase().replace('-', ''); // "p-01" と "p01" の両方に対応
+                const queryId = cleanKeyword.replace('-', '');
+                
+                return item.presenter.toLowerCase().includes(cleanKeyword) || 
+                       searchId.includes(queryId) || 
+                       item.title.toLowerCase().includes(cleanKeyword);
+            });
+
+            renderList(matched);
         }
 
         // 画像切り替え処理
@@ -322,7 +380,7 @@
             }
         }
 
-        // 画像が存在しない場合の代わり（登録がありません）
+        // 画像が存在しない場合の代わりに「登録がありません」表示
         function showNoDataImage() {
             const noDataSvg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='2100' viewBox='0 0 900 2100'><rect width='100%' height='100%' fill='%23f5f5f5'/><text x='50%' y='48%' font-size='42' font-weight='bold' dominant-baseline='middle' text-anchor='middle' fill='%23721c24'>登録がありません</text><text x='50%' y='53%' font-size='24' dominant-baseline='middle' text-anchor='middle' fill='%235f6368'>こちらの演題のポスターデータは登録されていません。</text></svg>";
             document.getElementById('poster').src = noDataSvg;
